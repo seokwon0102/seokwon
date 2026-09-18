@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="월계1동 원룸·투룸·오피스텔·빌라 실거주 조건을 익명으로 기록하고 확인하는 아카이브 (정적 데모판)">
+<title>실거주 아카이브</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e3e9ef;
+    --ink: #1b232e;
+    --ink-muted: #5b6675;
+    --accent: #c96a1f;
+    --accent-strong: #a4551a;
+    --accent-soft: #fae3ca;
+    --line: #d7dee6;
+    --ok: #2f7a54;
+    --ok-soft: #dcefe3;
+    --warn: #b3495a;
+    --warn-soft: #f7dde1;
+    --shadow: 0 1px 2px rgba(27,35,46,0.05), 0 8px 24px -14px rgba(27,35,46,0.25);
+    --scrim: rgba(255,255,255,0.8);
+    font-size: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10161d; --surface: #171f29; --surface-2: #1d2630;
+      --ink: #e8edf3; --ink-muted: #96a3b2;
+      --accent: #f0964b; --accent-strong: #ffb578; --accent-soft: #3a2a1a;
+      --line: #2a333e;
+      --ok: #57b586; --ok-soft: #1c3327;
+      --warn: #e57e8b; --warn-soft: #3a232a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 28px -14px rgba(0,0,0,0.6);
+      --scrim: rgba(16,22,29,0.82);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161d; --surface: #171f29; --surface-2: #1d2630;
+    --ink: #e8edf3; --ink-muted: #96a3b2;
+    --accent: #f0964b; --accent-strong: #ffb578; --accent-soft: #3a2a1a;
+    --line: #2a333e;
+    --ok: #57b586; --ok-soft: #1c3327;
+    --warn: #e57e8b; --warn-soft: #3a232a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 8px 28px -14px rgba(0,0,0,0.6);
+    --scrim: rgba(16,22,29,0.82);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', 'Noto Sans KR', sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  h1, h2, h3 { font-family: 'Gowun Batang', 'Noto Serif KR', serif; font-weight: 700; text-wrap: balance; margin: 0; }
+
+  /* ---- shell ---- */
+  header.topbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding-block: 12px;
+  }
+  .topbar-inner, .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-inline: 20px;
+  }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand { font-family: 'Gowun Batang', serif; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .brand .dot { color: var(--accent); }
+  .brand-fish { width: 30px; height: 30px; flex: none; }
+  .nav-actions { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 9px;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--ink-muted); padding-inline: 6px; }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  main { padding-block: 28px 72px; }
+
+  /* ---- intro strip ---- */
+  .intro {
+    padding: 18px 0 6px;
+    color: var(--ink-muted);
+    font-size: 0.94rem;
+  }
+  .intro b { color: var(--ink); font-weight: 600; }
+
+  /* ---- search ---- */
+  .search-row {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .search-row input[type="text"] {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .search-row select {
+    padding: 11px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .search-row input:focus, .search-row select:focus,
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* ---- building list ---- */
+  .b-list { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .b-card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+  .b-card-row { display: flex; gap: 14px; align-items: stretch; }
+  .b-thumb {
+    flex: none;
+    width: 108px;
+    aspect-ratio: 16 / 10;
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .b-thumb svg { display: block; width: 100%; height: 100%; }
+  .b-card-main { flex: 1; min-width: 0; padding: 2px 4px 2px 0; }
+  .b-card .row1 { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .b-card .name { font-weight: 600; font-size: 1.02rem; }
+  .b-card .addr { color: var(--ink-muted); font-size: 0.85rem; margin-top: 3px; }
+  .price-line { margin-top: 8px; font-weight: 700; font-size: 0.98rem; color: var(--accent-strong); font-family: 'IBM Plex Mono', monospace; }
+  .tag {
+    font-size: 0.7rem; font-weight: 600;
+    padding: 3px 9px; border-radius: 6px;
+    background: var(--accent-soft); color: var(--accent-strong);
+    white-space: nowrap;
+  }
+  .b-card .meta { margin-top: 8px; display: flex; gap: 14px; font-size: 0.78rem; color: var(--ink-muted); }
+  .b-hero {
+    margin-top: 16px;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .b-hero svg { display: block; width: 100%; height: 100%; }
+
+  .empty {
+    margin-top: 28px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--ink-muted);
+  }
+  .empty .btn { margin-top: 14px; }
+
+  .banner {
+    margin-top: 14px;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.86rem;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    border: 1px solid var(--line);
+  }
+
+  /* ---- detail ---- */
+  .back-link { font-size: 0.86rem; color: var(--ink-muted); display: inline-flex; align-items: center; gap: 4px; }
+  .b-head { margin-top: 14px; }
+  .b-head .addr { color: var(--ink-muted); margin-top: 6px; font-size: 0.94rem; }
+  .b-head h2 { font-size: 1.7rem; }
+  .stat-row {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .stat .k { font-size: 0.72rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat .v { margin-top: 4px; font-weight: 600; font-size: 1.02rem; }
+
+  .section-h {
+    margin-top: 30px;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .section-h h3 { font-size: 1.1rem; font-family: 'IBM Plex Sans KR', sans-serif; font-weight: 700; }
+
+  .r-list { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .r-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .r-card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .r-card .when { font-size: 0.76rem; color: var(--ink-muted); }
+  .r-grid {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+    font-size: 0.87rem;
+  }
+  .r-grid .k { color: var(--ink-muted); }
+  .r-grid .v { font-weight: 500; }
+  .chip-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 0.74rem; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-muted); border: 1px solid var(--line); }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+  .r-note { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 0.87rem; color: var(--ink); }
+
+  /* ---- give-to-get detail lock ---- */
+  .lock-banner {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .lock-banner-icon { font-size: 1.7rem; flex: none; line-height: 1; }
+  .lock-banner-text { flex: 1; min-width: 200px; font-size: 0.86rem; color: var(--ink); }
+  .lock-banner-text b { color: var(--accent-strong); }
+  .lock-banner .btn { flex: none; }
+  .locked-wrap { position: relative; margin-top: 4px; border-radius: 10px; overflow: hidden; }
+  .locked-blur { filter: blur(6px); user-select: none; pointer-events: none; }
+  .lock-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px;
+    text-align: center;
+    background: var(--scrim);
+    border-radius: 10px;
+  }
+  .lock-overlay span { font-size: 0.8rem; font-weight: 600; color: var(--ink-muted); }
+  .lock-overlay .btn { padding: 7px 14px; font-size: 0.8rem; }
+  .unlocked-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.74rem; font-weight: 600;
+    padding: 6px 10px; border-radius: 999px;
+    background: var(--ok-soft); color: var(--ok);
+    white-space: nowrap;
+  }
+  .unlocked-badge[hidden] { display: none; }
+
+  /* ---- form ---- */
+  form { margin-top: 8px; }
+  fieldset {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px 20px;
+    margin: 0 0 16px;
+  }
+  legend { font-weight: 600; font-size: 0.9rem; padding: 0 6px; color: var(--accent-strong); }
+  .field { margin-top: 14px; }
+  .field:first-child { margin-top: 0; }
+  .field label.main { display: block; font-size: 0.86rem; font-weight: 600; margin-bottom: 6px; }
+  .field .hint { font-size: 0.76rem; color: var(--ink-muted); margin-top: 4px; }
+  .field input[type="text"], .field input[type="number"], .field select, .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .check-grid { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 4px; }
+  .check-grid label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.86rem; }
+  .mode-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+  .mode-toggle button {
+    flex: 1; padding: 10px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--surface); font-size: 0.86rem; font-weight: 600; cursor: pointer;
+    color: var(--ink-muted);
+  }
+  .mode-toggle button.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong); }
+  .search-pick { position: relative; }
+  .pick-results {
+    margin-top: 6px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--surface);
+  }
+  .pick-item { padding: 10px 12px; font-size: 0.86rem; cursor: pointer; border-bottom: 1px solid var(--line); }
+  .pick-item:last-child { border-bottom: none; }
+  .pick-item:hover { background: var(--surface-2); }
+  .pick-item .a { color: var(--ink-muted); font-size: 0.78rem; }
+  .picked-box {
+    margin-top: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--accent-soft); color: var(--accent-strong);
+    border-radius: 9px; padding: 10px 14px; font-size: 0.86rem; font-weight: 600;
+  }
+  .picked-box button { background: none; border: none; color: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; font-size: 0.8rem; }
+
+  .submit-bar { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+  .field-error { color: var(--warn); font-size: 0.78rem; margin-top: 5px; }
+
+  /* ---- toast ---- */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 50;
+    max-width: calc(100% - 40px);
+    text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 560px) {
+    .two-col { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .r-grid { grid-template-columns: 1fr 1fr; }
+    .b-thumb { width: 78px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#/" class="brand">
+      <svg class="brand-fish" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M13 9 L17 3 L19.5 10.5 Z" fill="#3d4f5c"/>
+        <path d="M27 17 L32.5 10.5 L32.5 23.5 Z" fill="#3d4f5c"/>
+        <ellipse cx="16" cy="17.5" rx="12.5" ry="8.2" fill="#5b7386"/>
+        <path d="M7 22.5 Q4 27 1.5 26 Q4.5 23 5.5 20 Z" fill="#e0a563"/>
+        <circle cx="9.3" cy="15.5" r="4.3" fill="#f5f8fa"/>
+        <circle cx="8.5" cy="15.5" r="2.7" fill="#182029"/>
+        <circle cx="7.5" cy="14.3" r="0.9" fill="#ffffff"/>
+        <path d="M4.2 19.5 Q6.5 21.5 9.5 20.3" stroke="#33424c" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span>우럭 거주 아카이브</span>
+    </a>
+    <div class="nav-actions">
+      <span id="unlock-badge" class="unlocked-badge" hidden>🔓 상세 열람 가능</span>
+      <a class="btn primary" href="#/submit">제보하기</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div id="toast"></div>
+
+<script>
+window.__WOLGYE_SEED__ = {"buildings": {"b01": {"address": "월계1동, 광운대 후문 도보 5분", "buildingType": "원룸", "createdAt": "2025-02-10T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 1000, "lastJeonseAmount": null, "lastRent": 45, "lastReportAt": "2025-11-20T00:00:00.000Z", "lastSaleAmount": null, "name": "월계로 12길 나래빌"}, "b02": {"address": "월계1동, 초안산 근린공원 인근", "buildingType": "빌라", "createdAt": "2024-09-20T00:00:00.000Z", "lastDealType": "매매", "lastDeposit": null, "lastJeonseAmount": null, "lastRent": null, "lastReportAt": "2026-07-15T00:00:00.000Z", "lastSaleAmount": 32000, "name": "밝은빌라"}, "b03": {"address": "월계1동, 광운대역 도보 10분", "buildingType": "오피스텔", "createdAt": "2025-05-18T00:00:00.000Z", "lastDealType": "전세", "lastDeposit": null, "lastJeonseAmount": 15000, "lastRent": null, "lastReportAt": "2026-07-01T00:00:00.000Z", "lastSaleAmount": null, "name": "코너하우스"}, "b04": {"address": "월계1동, 동부간선로 인근", "buildingType": "빌라", "createdAt": "2023-12-05T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 1500, "lastJeonseAmount": null, "lastRent": 50, "lastReportAt": "2023-12-05T00:00:00.000Z", "lastSaleAmount": null, "name": "장미빌라 3층"}, "b05": {"address": "월계1동, 광운대 정문 도보 3분", "buildingType": "원룸", "createdAt": "2023-08-30T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 300, "lastJeonseAmount": null, "lastRent": 38, "lastReportAt": "2026-04-11T00:00:00.000Z", "lastSaleAmount": null, "name": "해피스테이 원룸텔"}, "b06": {"address": "월계1동, 광운초등학교 근처", "buildingType": "원룸", "createdAt": "2024-11-14T00:00:00.000Z", "lastDealType": "전세", "lastDeposit": null, "lastJeonseAmount": 6000, "lastRent": null, "lastReportAt": "2026-07-08T00:00:00.000Z", "lastSaleAmount": null, "name": "은하빌"}, "b07": {"address": "월계1동, 월계1동주민센터 인근", "buildingType": "투룸", "createdAt": "2024-01-10T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 2000, "lastJeonseAmount": null, "lastRent": 58, "lastReportAt": "2026-02-08T00:00:00.000Z", "lastSaleAmount": null, "name": "투게더하우스"}, "b08": {"address": "월계1동, 광운대역 도보 7분", "buildingType": "오피스텔", "createdAt": "2024-07-19T00:00:00.000Z", "lastDealType": "매매", "lastDeposit": null, "lastJeonseAmount": null, "lastRent": null, "lastReportAt": "2026-07-10T00:00:00.000Z", "lastSaleAmount": 45000, "name": "센트럴오피스텔"}, "b09": {"address": "월계1동, 광운대 후문 도보 8분", "buildingType": "원룸", "createdAt": "2023-03-01T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 200, "lastJeonseAmount": null, "lastRent": 35, "lastReportAt": "2023-03-01T00:00:00.000Z", "lastSaleAmount": null, "name": "행복한집"}, "b10": {"address": "월계1동, 초안산 자락", "buildingType": "빌라", "createdAt": "2024-12-20T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 1500, "lastJeonseAmount": null, "lastRent": 52, "lastReportAt": "2025-09-05T00:00:00.000Z", "lastSaleAmount": null, "name": "미소빌라"}, "b11": {"address": "월계1동, 광운대 정문 도보 10분", "buildingType": "투룸", "createdAt": "2026-06-12T00:00:00.000Z", "lastDealType": "전세", "lastDeposit": null, "lastJeonseAmount": 9000, "lastRent": null, "lastReportAt": "2026-07-05T00:00:00.000Z", "lastSaleAmount": null, "name": "투룸하우스 청담"}, "b12": {"address": "월계1동, 광운대 캠퍼스 바로 옆", "buildingType": "원룸", "createdAt": "2024-02-14T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 300, "lastJeonseAmount": null, "lastRent": 40, "lastReportAt": "2026-08-20T00:00:00.000Z", "lastSaleAmount": null, "name": "라온빌"}, "b13": {"address": "월계1동, 인덕대 방향", "buildingType": "기타", "createdAt": "2024-10-11T00:00:00.000Z", "lastDealType": "월세", "lastDeposit": 1000, "lastJeonseAmount": null, "lastRent": 47, "lastReportAt": "2025-07-25T00:00:00.000Z", "lastSaleAmount": null, "name": "그린하우스"}, "b14": {"address": "월계1동, 동부간선로 인근", "buildingType": "빌라", "createdAt": "2022-12-30T00:00:00.000Z", "lastDealType": "매매", "lastDeposit": null, "lastJeonseAmount": null, "lastRent": null, "lastReportAt": "2026-07-12T00:00:00.000Z", "lastSaleAmount": 28000, "name": "다솜빌라"}, "b15": {"address": "월계1동, 광운대역 도보 12분", "buildingType": "투룸", "createdAt": "2025-03-15T00:00:00.000Z", "lastDealType": "전세", "lastDeposit": null, "lastJeonseAmount": 11000, "lastRent": null, "lastReportAt": "2026-07-20T00:00:00.000Z", "lastSaleAmount": null, "name": "투게더 투룸텔"}}, "reports": {"buildings/b01/reports": {"r1": {"createdAt": "2025-11-20T00:00:00.000Z", "deposit": 1000, "floor": "2층", "heatingCostNote": "겨울에 8~10만원 정도 따로 나감", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024~2025", "maintenanceFee": 7, "maintenanceIncludes": ["수도", "인터넷"], "mold": "없음", "noise": "보통", "note": "건물이 오래되긴 했지만 관리사무소가 친절해요. 주차는 안 되니 참고하세요.", "parking": "불가능", "position": "중간방", "rent": 45, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "202호"}, "r2": {"createdAt": "2025-02-10T00:00:00.000Z", "deposit": 500, "floor": "4층", "heatingCostNote": "12만원 넘게 나온 달도 있었어요", "heatingFeel": "높음", "heatingType": "개별난방(보일러)", "hotWater": "저녁 시간대 약해짐", "lightLevel": "밝음", "livedPeriod": "2023~2024", "maintenanceFee": 6, "maintenanceIncludes": ["수도", "전기", "인터넷"], "mold": "약간 있음", "noise": "조용함", "note": "겨울철 난방비가 좀 부담스러웠어요. 창틀 쪽에 곰팡이가 살짝 폈었습니다.", "parking": "불가능", "position": "끝방(모서리)", "rent": 42, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "401호"}}, "buildings/b02/reports": {"r1": {"createdAt": "2026-01-15T00:00:00.000Z", "deposit": 2000, "floor": "3층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "지역난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025~2026", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "인터넷", "난방"], "mold": "없음", "noise": "조용함", "note": "지역난방이라 관리비에 난방비가 포함돼 있어서 편했어요.", "parking": "가능", "position": "중간방", "rent": 55, "residencyStatus": "거주 중", "roomType": "투룸", "unitNumber": "302호"}, "r2": {"createdAt": "2025-06-01T00:00:00.000Z", "deposit": 1000, "floor": "2층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "지역난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024", "maintenanceFee": 7, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "보통", "note": "주차공간이 넉넉해서 좋았어요.", "parking": "가능", "position": "중간방", "rent": 48, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "203호"}, "r3": {"createdAt": "2024-09-20T00:00:00.000Z", "deposit": 800, "floor": "1층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "지역난방", "hotWater": "문제없음", "lightLevel": "어두움", "livedPeriod": "2023~2024", "maintenanceFee": 9, "maintenanceIncludes": ["수도", "전기"], "mold": "없음", "noise": "시끄러움", "note": "1층이라 그런지 도로 소음이 좀 있었어요.", "parking": "가능", "position": "끝방(모서리)", "rent": 50, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "101호"}, "r4": {"createdAt": "2026-07-15T00:00:00.000Z", "dealType": "매매", "deposit": null, "floor": "5층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "지역난방", "hotWater": "문제없음", "jeonseAmount": null, "lightLevel": "보통", "livedPeriod": "", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "인터넷"], "mold": "없음", "noise": "조용함", "note": "매매로 나온 매물이에요. 지역난방이라 관리비 부담이 적습니다.", "parking": "가능", "position": "중간방", "rent": null, "roomType": "투룸", "saleAmount": 32000, "unitNumber": "502호"}}, "buildings/b03/reports": {"r1": {"createdAt": "2026-03-02T00:00:00.000Z", "deposit": 3000, "floor": "7층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "중앙난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025", "maintenanceFee": 12, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방", "청소"], "mold": "없음", "noise": "조용함", "note": "관리비는 좀 비싸지만 그만큼 관리가 잘 됩니다. 헬스장도 있어요.", "parking": "가능", "position": "중간방", "rent": 60, "residencyStatus": "퇴거 완료", "roomType": "오피스텔", "unitNumber": "701호"}, "r2": {"createdAt": "2025-05-18T00:00:00.000Z", "deposit": 3000, "floor": "6층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "중앙난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024~2025", "maintenanceFee": 13, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방"], "mold": "없음", "noise": "보통", "note": "주차는 추가 비용을 내야 해요.", "parking": "불가능", "position": "중간방", "rent": 62, "residencyStatus": "퇴거 완료", "roomType": "오피스텔", "unitNumber": "602호"}, "r3": {"createdAt": "2026-07-01T00:00:00.000Z", "dealType": "전세", "deposit": null, "floor": "9층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "중앙난방", "hotWater": "문제없음", "jeonseAmount": 15000, "lightLevel": "밝음", "livedPeriod": "", "maintenanceFee": 12, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방", "청소"], "mold": "없음", "noise": "조용함", "note": "전세 매물로 나왔어요. 전세자금대출 이용하기도 편했습니다.", "parking": "가능", "position": "중간방", "rent": null, "residencyStatus": "거주 중", "roomType": "오피스텔", "saleAmount": null, "unitNumber": "905호"}}, "buildings/b04/reports": {"r1": {"createdAt": "2023-12-05T00:00:00.000Z", "deposit": 1500, "floor": "1층", "heatingCostNote": "동절기 15만원 가까이 나왔어요", "heatingFeel": "높음", "heatingType": "개별난방(보일러)", "hotWater": "자주 끊김", "lightLevel": "어두움", "livedPeriod": "2023", "maintenanceFee": 6, "maintenanceIncludes": ["수도"], "mold": "심함", "noise": "보통", "note": "베란다 쪽 결로가 심해서 곰팡이 제거를 자주 해야 했어요. 온수도 자주 끊겼습니다.", "parking": "가능", "position": "끝방(모서리)", "rent": 50, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "102호"}}, "buildings/b05/reports": {"r1": {"createdAt": "2026-04-11T00:00:00.000Z", "deposit": 300, "floor": "3층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025~2026", "maintenanceFee": 5, "maintenanceIncludes": ["수도", "전기", "인터넷", "청소"], "mold": "없음", "noise": "시끄러움", "note": "복도식이라 옆방 소리가 좀 들려요. 청소는 매주 해주셔서 편했습니다.", "parking": "불가능", "position": "중간방", "rent": 38, "residencyStatus": "거주 중", "roomType": "원룸", "unitNumber": "303호"}, "r2": {"createdAt": "2025-01-22T00:00:00.000Z", "deposit": 300, "floor": "5층", "heatingCostNote": "겨울에 13만원", "heatingFeel": "매우 높음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "밝음", "livedPeriod": "2024~2025", "maintenanceFee": 5, "maintenanceIncludes": ["수도", "전기", "인터넷"], "mold": "없음", "noise": "보통", "note": "방이 작아서 그런지 난방비 대비 잘 안 따뜻했어요.", "parking": "불가능", "position": "끝방(모서리)", "rent": 40, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "501호"}, "r3": {"createdAt": "2023-08-30T00:00:00.000Z", "deposit": 300, "floor": "2층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2023", "maintenanceFee": 5, "maintenanceIncludes": ["수도", "전기"], "mold": "없음", "noise": "보통", "note": "신축이라 시설은 깔끔했어요.", "parking": "불가능", "position": "중간방", "rent": 39, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "204호"}}, "buildings/b06/reports": {"r1": {"createdAt": "2025-10-02T00:00:00.000Z", "deposit": 500, "floor": "4층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "매우 밝음", "livedPeriod": "2025", "maintenanceFee": 6, "maintenanceIncludes": ["수도", "인터넷"], "mold": "없음", "noise": "조용함", "note": "볕이 잘 들어서 난방비 부담이 적었어요.", "parking": "불가능", "position": "끝방(모서리)", "rent": 43, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "401호"}, "r2": {"createdAt": "2024-11-14T00:00:00.000Z", "deposit": 500, "floor": "2층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "저녁 시간대 약해짐", "lightLevel": "보통", "livedPeriod": "2024", "maintenanceFee": 6, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "조용함", "note": "저녁에 씻을 때 온수가 약간 약해지는 편이에요.", "parking": "불가능", "position": "중간방", "rent": 43, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "203호"}, "r3": {"createdAt": "2026-07-08T00:00:00.000Z", "dealType": "전세", "deposit": null, "floor": "3층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "jeonseAmount": 6000, "lightLevel": "보통", "livedPeriod": "", "maintenanceFee": 6, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "조용함", "note": "전세로 계약했어요. 목돈은 들지만 매달 나가는 돈이 없어서 좋아요.", "parking": "불가능", "position": "중간방", "rent": null, "residencyStatus": "거주 중", "roomType": "원룸", "saleAmount": null, "unitNumber": "302호"}}, "buildings/b07/reports": {"r1": {"createdAt": "2026-02-08T00:00:00.000Z", "deposit": 2000, "floor": "2층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025~2026", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "전기", "인터넷"], "mold": "없음", "noise": "보통", "note": "룸메이트랑 같이 살기 좋은 구조예요.", "parking": "가능", "position": "중간방", "rent": 58, "residencyStatus": "거주 중", "roomType": "투룸", "unitNumber": "202호"}, "r2": {"createdAt": "2024-01-10T00:00:00.000Z", "deposit": 2000, "floor": "1층", "heatingCostNote": "겨울 난방비 둘이 나눠도 부담됐어요", "heatingFeel": "높음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "어두움", "livedPeriod": "2023~2024", "maintenanceFee": 9, "maintenanceIncludes": ["수도", "전기"], "mold": "약간 있음", "noise": "보통", "note": "화장실 쪽에 곰팡이가 살짝 있었어요.", "parking": "가능", "position": "끝방(모서리)", "rent": 60, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "101호"}}, "buildings/b08/reports": {"r1": {"createdAt": "2026-05-01T00:00:00.000Z", "deposit": 5000, "floor": "12층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "중앙난방", "hotWater": "문제없음", "lightLevel": "밝음", "livedPeriod": "2026", "maintenanceFee": 15, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방", "청소", "주차"], "mold": "없음", "noise": "조용함", "note": "관리비가 비싼 대신 전부 포함이라 계산하기 편해요.", "parking": "가능", "position": "중간방", "rent": 65, "residencyStatus": "거주 중", "roomType": "오피스텔", "unitNumber": "1204호"}, "r2": {"createdAt": "2024-07-19T00:00:00.000Z", "deposit": 5000, "floor": "10층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "중앙난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024", "maintenanceFee": 14, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방"], "mold": "없음", "noise": "보통", "note": "주차는 되지만 자리가 넉넉하진 않아요.", "parking": "가능", "position": "중간방", "rent": 63, "residencyStatus": "퇴거 완료", "roomType": "오피스텔", "unitNumber": "1005호"}, "r3": {"createdAt": "2026-07-10T00:00:00.000Z", "dealType": "매매", "deposit": null, "floor": "15층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "중앙난방", "hotWater": "문제없음", "jeonseAmount": null, "lightLevel": "밝음", "livedPeriod": "", "maintenanceFee": 15, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방", "청소", "주차"], "mold": "없음", "noise": "조용함", "note": "투자 목적으로 매매했어요. 관리가 잘 되는 오피스텔이라 만족합니다.", "parking": "가능", "position": "중간방", "rent": null, "roomType": "오피스텔", "saleAmount": 45000, "unitNumber": "1502호"}}, "buildings/b09/reports": {"r1": {"createdAt": "2023-03-01T00:00:00.000Z", "deposit": 200, "floor": "1층", "heatingCostNote": "겨울에 14만원 나온 적도 있어요", "heatingFeel": "매우 높음", "heatingType": "개별난방(보일러)", "hotWater": "자주 끊김", "lightLevel": "어두움", "livedPeriod": "2022~2023", "maintenanceFee": 4, "maintenanceIncludes": ["수도"], "mold": "약간 있음", "noise": "시끄러움", "note": "저렴한 만큼 시설은 오래됐어요. 겨울엔 미리 난방비 각오하세요.", "parking": "불가능", "position": "끝방(모서리)", "rent": 35, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "103호"}}, "buildings/b10/reports": {"r1": {"createdAt": "2025-09-05T00:00:00.000Z", "deposit": 1500, "floor": "3층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "매우 밝음", "livedPeriod": "2025", "maintenanceFee": 7, "maintenanceIncludes": ["수도", "인터넷"], "mold": "없음", "noise": "조용함", "note": "조용하고 볕도 잘 들어요.", "parking": "가능", "position": "끝방(모서리)", "rent": 52, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "301호"}, "r2": {"createdAt": "2024-12-20T00:00:00.000Z", "deposit": 1500, "floor": "2층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024~2025", "maintenanceFee": 7, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "보통", "note": "산 근처라 그런지 여름엔 시원하고 겨울엔 좀 추워요.", "parking": "가능", "position": "중간방", "rent": 53, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "202호"}}, "buildings/b11/reports": {"r1": {"createdAt": "2026-06-12T00:00:00.000Z", "deposit": 3000, "floor": "4층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025~2026", "maintenanceFee": 10, "maintenanceIncludes": ["수도", "전기", "인터넷", "청소"], "mold": "없음", "noise": "조용함", "note": "신축급이라 시설이 좋아요. 가격은 좀 있는 편.", "parking": "가능", "position": "중간방", "rent": 70, "residencyStatus": "거주 중", "roomType": "투룸", "unitNumber": "402호"}, "r2": {"createdAt": "2026-07-05T00:00:00.000Z", "dealType": "전세", "deposit": null, "floor": "5층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "jeonseAmount": 9000, "lightLevel": "밝음", "livedPeriod": "", "maintenanceFee": 10, "maintenanceIncludes": ["수도", "전기", "인터넷", "청소"], "mold": "없음", "noise": "조용함", "note": "전세로 들어왔어요. 신축급이라 전세가가 좀 있는 편이에요.", "parking": "가능", "position": "중간방", "rent": null, "residencyStatus": "거주 중", "roomType": "투룸", "saleAmount": null, "unitNumber": "503호"}}, "buildings/b12/reports": {"r1": {"createdAt": "2026-08-20T00:00:00.000Z", "deposit": 300, "floor": "3층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2026", "maintenanceFee": 5, "maintenanceIncludes": ["수도", "전기"], "mold": "없음", "noise": "보통", "note": "학교랑 진짜 가까워서 등교가 편해요.", "parking": "불가능", "position": "중간방", "rent": 40, "residencyStatus": "거주 중", "roomType": "원룸", "unitNumber": "303호"}, "r2": {"createdAt": "2025-04-07T00:00:00.000Z", "deposit": 300, "floor": "1층", "heatingCostNote": "", "heatingFeel": "높음", "heatingType": "개별난방(보일러)", "hotWater": "저녁 시간대 약해짐", "lightLevel": "밝음", "livedPeriod": "2025", "maintenanceFee": 5, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "시끄러움", "note": "학교 앞이라 편한데 밤에 학생들 소리가 좀 들려요.", "parking": "불가능", "position": "끝방(모서리)", "rent": 41, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "101호"}, "r3": {"createdAt": "2024-02-14T00:00:00.000Z", "deposit": 300, "floor": "2층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2023~2024", "maintenanceFee": 5, "maintenanceIncludes": ["수도", "전기", "인터넷"], "mold": "없음", "noise": "보통", "note": "가성비 괜찮았어요.", "parking": "불가능", "position": "중간방", "rent": 39, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "204호"}}, "buildings/b13/reports": {"r1": {"createdAt": "2025-07-25T00:00:00.000Z", "deposit": 1000, "floor": "3층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025", "maintenanceFee": 6, "maintenanceIncludes": ["수도", "인터넷"], "mold": "없음", "noise": "보통", "note": "인덕대 쪽이라 광운대까지는 걸어서 15분 정도 걸려요.", "parking": "불가능", "position": "중간방", "rent": 47, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "302호"}, "r2": {"createdAt": "2024-10-11T00:00:00.000Z", "deposit": 500, "floor": "2층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024", "maintenanceFee": 5, "maintenanceIncludes": ["수도"], "mold": "없음", "noise": "조용함", "note": "조용하고 저렴한 편이에요.", "parking": "불가능", "position": "중간방", "rent": 40, "residencyStatus": "퇴거 완료", "roomType": "원룸", "unitNumber": "201호"}}, "buildings/b14/reports": {"r1": {"createdAt": "2022-12-30T00:00:00.000Z", "deposit": 2000, "floor": "1층", "heatingCostNote": "20만원 가까이 나온 적 있어요", "heatingFeel": "매우 높음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "lightLevel": "어두움", "livedPeriod": "2022", "maintenanceFee": 7, "maintenanceIncludes": ["수도", "전기"], "mold": "심함", "noise": "보통", "note": "단열이 잘 안 되는지 난방비가 많이 나왔고, 곰팡이도 심했어요.", "parking": "가능", "position": "끝방(모서리)", "rent": 55, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "102호"}, "r2": {"createdAt": "2026-07-12T00:00:00.000Z", "dealType": "매매", "deposit": null, "floor": "1층", "heatingCostNote": "", "heatingFeel": "매우 높음", "heatingType": "개별난방(보일러)", "hotWater": "문제없음", "jeonseAmount": null, "lightLevel": "어두움", "livedPeriod": "", "maintenanceFee": 7, "maintenanceIncludes": ["수도", "전기"], "mold": "심함", "noise": "보통", "note": "매매로 살어 들어왔는데 곰팡이 문제로 리모델링을 좀 해야 했어요.", "parking": "가능", "position": "끝방(모서리)", "rent": null, "roomType": "투룸", "saleAmount": 28000, "unitNumber": "103호"}}, "buildings/b15/reports": {"r1": {"createdAt": "2026-01-30T00:00:00.000Z", "deposit": 1000, "floor": "6층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "지역난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2025~2026", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방"], "mold": "없음", "noise": "조용함", "note": "관리비에 난방비까지 포함이라 예상 밖 지출이 없었어요.", "parking": "가능", "position": "중간방", "rent": 56, "residencyStatus": "거주 중", "roomType": "투룸", "unitNumber": "602호"}, "r2": {"createdAt": "2025-03-15T00:00:00.000Z", "deposit": 1000, "floor": "4층", "heatingCostNote": "", "heatingFeel": "보통", "heatingType": "지역난방", "hotWater": "문제없음", "lightLevel": "보통", "livedPeriod": "2024~2025", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방"], "mold": "없음", "noise": "보통", "note": "역까지 좀 걸어야 하지만 방은 넓은 편.", "parking": "가능", "position": "중간방", "rent": 57, "residencyStatus": "퇴거 완료", "roomType": "투룸", "unitNumber": "403호"}, "r3": {"createdAt": "2026-07-20T00:00:00.000Z", "dealType": "전세", "deposit": null, "floor": "7층", "heatingCostNote": "", "heatingFeel": "낮음", "heatingType": "지역난방", "hotWater": "문제없음", "jeonseAmount": 11000, "lightLevel": "밝음", "livedPeriod": "", "maintenanceFee": 8, "maintenanceIncludes": ["수도", "전기", "인터넷", "난방"], "mold": "없음", "noise": "조용함", "note": "전세로 계약했고 지역난방이라 관리비 예측이 쉬웠어요.", "parking": "가능", "position": "중간방", "rent": null, "residencyStatus": "거주 중", "roomType": "투룸", "saleAmount": null, "unitNumber": "703호"}}}};
+</script>
+<script>
+/*
+ * Standalone (GitHub Pages / any static host) stand-in for the Artifact `db`
+ * and `assets` runtime capabilities used by the main site script.
+ *
+ * It implements the same tiny subset of the Firestore-like API the site
+ * calls (collection().orderBy().limit().onSnapshot()/get()/add(),
+ * doc().onSnapshot()/update()/get()) but backs it with localStorage instead
+ * of a shared cloud database. That means:
+ *   - Data persists across reloads in THIS browser only.
+ *   - It is NOT shared between different visitors/devices (no real backend).
+ *   - Uploaded "계약서 사진" files are stored as base64 data URLs directly
+ *     inside the report document, not as separate blobs.
+ * This keeps the main script (wolgye1 site logic) completely unchanged.
+ */
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "wolgye1_static_db_v1";
+  var listeners = {}; // collectionPath -> [{orderBy, dir, limit, cb}]
+  var docListeners = {}; // "collectionPath/docId" -> [cb]
+
+  function loadStore() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+  function saveStore() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE)); } catch (e) {}
+  }
+
+  var STORE = loadStore();
+  if (!STORE) {
+    var seed = window.__WOLGYE_SEED__ || { buildings: {}, reports: {} };
+    STORE = { buildings: Object.assign({}, seed.buildings) };
+    Object.keys(seed.reports || {}).forEach(function (colPath) {
+      STORE[colPath] = Object.assign({}, seed.reports[colPath]);
+    });
+    saveStore();
+  }
+
+  function col(path) {
+    if (!STORE[path]) STORE[path] = {};
+    return STORE[path];
+  }
+
+  function newId() {
+    return "id" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function fireCollection(path) {
+    (listeners[path] || []).forEach(function (entry) { entry.fire(); });
+  }
+  function fireDoc(path, id) {
+    (docListeners[path + "/" + id] || []).forEach(function (fn) { fn(); });
+  }
+
+  function snapshotDocs(path, orderByField, dir, limitN) {
+    var data = col(path);
+    var docs = Object.keys(data).map(function (id) {
+      return { id: id, exists: true, data: function () { return data[id]; } };
+    });
+    if (orderByField) {
+      docs.sort(function (a, b) {
+        var av = a.data()[orderByField], bv = b.data()[orderByField];
+        if (av == null && bv == null) return 0;
+        if (av == null) return dir === "desc" ? 1 : -1;
+        if (bv == null) return dir === "desc" ? -1 : 1;
+        if (av < bv) return dir === "desc" ? 1 : -1;
+        if (av > bv) return dir === "desc" ? -1 : 1;
+        return 0;
+      });
+    }
+    if (limitN) docs = docs.slice(0, limitN);
+    return docs;
+  }
+
+  function collectionRef(path) {
+    var _orderBy = null, _dir = "asc", _limit = null;
+    var ref = {
+      orderBy: function (field, dir) { _orderBy = field; _dir = dir || "asc"; return ref; },
+      limit: function (n) { _limit = n; return ref; },
+      onSnapshot: function (cb, errCb) {
+        var entry = {
+          fire: function () {
+            try { cb({ docs: snapshotDocs(path, _orderBy, _dir, _limit) }); }
+            catch (e) { if (errCb) errCb(e); }
+          }
+        };
+        if (!listeners[path]) listeners[path] = [];
+        listeners[path].push(entry);
+        entry.fire();
+        return function () {
+          var arr = listeners[path];
+          if (!arr) return;
+          var i = arr.indexOf(entry);
+          if (i > -1) arr.splice(i, 1);
+        };
+      },
+      get: function () {
+        return Promise.resolve({ docs: snapshotDocs(path, _orderBy, _dir, _limit) });
+      },
+      add: function (data) {
+        var id = newId();
+        col(path)[id] = data;
+        saveStore();
+        fireCollection(path);
+        return Promise.resolve({ id: id });
+      }
+    };
+    return ref;
+  }
+
+  function docRef(path) {
+    var parts = path.split("/");
+    var id = parts.pop();
+    var colPath = parts.join("/");
+    return {
+      onSnapshot: function (cb, errCb) {
+        var key = colPath + "/" + id;
+        function fire() {
+          var data = col(colPath)[id];
+          try { cb({ id: id, exists: data !== undefined, data: function () { return data; } }); }
+          catch (e) { if (errCb) errCb(e); }
+        }
+        if (!docListeners[key]) docListeners[key] = [];
+        docListeners[key].push(fire);
+        fire();
+        return function () {
+          var arr = docListeners[key];
+          if (!arr) return;
+          var i = arr.indexOf(fire);
+          if (i > -1) arr.splice(i, 1);
+        };
+      },
+      get: function () {
+        var data = col(colPath)[id];
+        return Promise.resolve({ id: id, exists: data !== undefined, data: function () { return data; } });
+      },
+      update: function (patch) {
+        var data = col(colPath)[id];
+        if (data === undefined) return Promise.reject({ code: "invalid_argument" });
+        col(colPath)[id] = Object.assign({}, data, patch);
+        saveStore();
+        fireDoc(colPath, id);
+        fireCollection(colPath);
+        return Promise.resolve();
+      },
+      set: function (data) {
+        col(colPath)[id] = data;
+        saveStore();
+        fireDoc(colPath, id);
+        fireCollection(colPath);
+        return Promise.resolve();
+      }
+    };
+  }
+
+  var localDb = { collection: collectionRef, doc: docRef };
+
+  function fileToDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  var localAssets = {
+    upload: function (file) {
+      return fileToDataUrl(file).then(function (dataUrl) { return { id: dataUrl }; });
+    }
+  };
+
+  window.claude = {
+    hot: { ready: function (fn) { fn(); } },
+    use: function (name) {
+      if (name === "db") return Promise.resolve(localDb);
+      if (name === "assets") return Promise.resolve(localAssets);
+      return Promise.resolve(null);
+    }
+  };
+})();
+
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var ROOM_TYPES = ["원룸", "투룸", "오피스텔", "빌라", "기타"];
+  var DEAL_TYPES = ["월세", "전세", "매매"];
+  var INCLUDE_ITEMS = ["수도", "전기", "인터넷", "난방", "청소", "주차"];
+  var POSITIONS = ["끝방(모서리)", "중간방", "모르겠음"];
+  var LIGHT_LEVELS = ["매우 밝음", "밝음", "보통", "어두움", "매우 어두움", "모르겠음"];
+  var RESIDENCY_STATUS = ["거주 중", "퇴거 완료"];
+  var HEATING_TYPES = ["개별난방(보일러)", "중앙난방", "지역난방", "모르겠음"];
+  var HEATING_FEEL = ["매우 낮음", "낮음", "보통", "높음", "매우 높음", "모르겠음"];
+  var HOT_WATER = ["문제없음", "저녁 시간대 약해짐", "자주 끊김", "모르겠음"];
+  var MOLD = ["없음", "약간 있음", "심함", "모르겠음"];
+  var NOISE = ["조용함", "보통", "시끄러움", "모르겠음"];
+  var PARKING = ["가능", "불가능", "모르겠음"];
+
+  var app = document.getElementById("app");
+  var toastEl = document.getElementById("toast");
+  var db = null;
+  var dbState = "loading"; // loading | ready | unavailable
+  var activeUnsubs = [];
+  var toastTimer = null;
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 3200);
+  }
+  function fmtWon(n) {
+    if (n === null || n === undefined || n === "" || isNaN(n)) return "-";
+    n = Number(n);
+    if (n >= 10000) {
+      var eok = Math.floor(n / 10000);
+      var rem = n % 10000;
+      return eok + "억" + (rem ? " " + rem.toLocaleString("ko-KR") + "만원" : "");
+    }
+    return n.toLocaleString("ko-KR") + "만원";
+  }
+  function lastPriceLine(b) {
+    var d = b.lastDealType || "월세";
+    if (d === "전세") return b.lastJeonseAmount != null ? "전세 " + fmtWon(b.lastJeonseAmount) : "";
+    if (d === "매매") return b.lastSaleAmount != null ? "매매 " + fmtWon(b.lastSaleAmount) : "";
+    var parts = [];
+    if (b.lastRent != null) parts.push("월세 " + fmtWon(b.lastRent));
+    if (b.lastDeposit != null) parts.push("보증금 " + fmtWon(b.lastDeposit));
+    return parts.join(" · ");
+  }
+
+  // ---- generated building illustration (no real photo needed) ----
+  var ART_PALETTES = {
+    "원룸": { skyTop: "#fbe9d3", skyBottom: "#f6dcb8", ground: "#e8c9a0", building: "#c98a4b", lit: "#ffd98a", dark: "#8a5a2e", tree: "#9c8a52", trunk: "#6b5638", door: "#7a4a22" },
+    "투룸": { skyTop: "#dce8f0", skyBottom: "#c9dbe6", ground: "#b7cdd8", building: "#5b7386", lit: "#ffd98a", dark: "#3d4f5c", tree: "#6f8f6a", trunk: "#4d3c2a", door: "#33424c" },
+    "오피스텔": { skyTop: "#e6edf1", skyBottom: "#d3e2e6", ground: "#c3d6d9", building: "#3f6b73", lit: "#bfe7e9", dark: "#274850", tree: "#5f8f7d", trunk: "#4d3c2a", door: "#1f3a40" },
+    "빌라": { skyTop: "#eef2e2", skyBottom: "#dfe7cb", ground: "#c9d3a8", building: "#8a9a6b", lit: "#ffe8a3", dark: "#5c684a", tree: "#7a9a5a", trunk: "#5a4630", door: "#4b5636" },
+    "기타": { skyTop: "#ececf1", skyBottom: "#dadfe6", ground: "#c7ccd4", building: "#7c8896", lit: "#ffd98a", dark: "#54606c", tree: "#7f9481", trunk: "#5a4630", door: "#3f4a54" }
+  };
+  function hashStr(s) {
+    var h = 0;
+    for (var i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+    return Math.abs(h);
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function buildingArt(b) {
+    var seed = hashStr((b.name || "") + "|" + (b.buildingType || ""));
+    var rnd = mulberry32(seed);
+    var pal = ART_PALETTES[b.buildingType] || ART_PALETTES["기타"];
+    var w = 320, h = 180;
+    var floors = 3 + Math.floor(rnd() * 4);
+    var cols = 3 + Math.floor(rnd() * 3);
+    var bw = 130 + Math.floor(rnd() * 70);
+    var bx = (w - bw) / 2 + (rnd() * 24 - 12);
+    var bh = floors * 24 + 24;
+    var by = h - 34 - bh;
+    var innerW = bw - 24, innerH = bh - 24;
+    var winW = innerW / cols, winH = (innerH / floors) * 0.62;
+    var windows = "";
+    for (var r = 0; r < floors; r++) {
+      for (var c = 0; c < cols; c++) {
+        var lit = rnd() < 0.4;
+        var wx = bx + 12 + c * winW + (winW - winW * 0.68) / 2;
+        var wy = by + 14 + r * (innerH / floors);
+        windows += '<rect x="' + wx.toFixed(1) + '" y="' + wy.toFixed(1) + '" width="' + (winW * 0.68).toFixed(1) + '" height="' + winH.toFixed(1) + '" rx="1.4" fill="' + (lit ? pal.lit : pal.dark) + '" opacity="' + (lit ? 1 : 0.6) + '"/>';
+      }
+    }
+    var treeX = Math.max(18, bx - 24 + rnd() * 12);
+    var treeX2 = Math.min(w - 18, bx + bw + 24 - rnd() * 12);
+    return (
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(b.name) + ' 건물 이미지" preserveAspectRatio="xMidYMax slice">' +
+        '<defs><linearGradient id="sky' + seed + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0" stop-color="' + pal.skyTop + '"/><stop offset="1" stop-color="' + pal.skyBottom + '"/>' +
+        "</linearGradient></defs>" +
+        '<rect width="' + w + '" height="' + h + '" fill="url(#sky' + seed + ')"/>' +
+        '<rect x="0" y="' + (h - 26) + '" width="' + w + '" height="26" fill="' + pal.ground + '"/>' +
+        '<circle cx="' + treeX.toFixed(1) + '" cy="' + (h - 44) + '" r="13" fill="' + pal.tree + '"/><rect x="' + (treeX - 2).toFixed(1) + '" y="' + (h - 32) + '" width="4" height="14" fill="' + pal.trunk + '"/>' +
+        '<circle cx="' + treeX2.toFixed(1) + '" cy="' + (h - 40) + '" r="10" fill="' + pal.tree + '" opacity="0.85"/><rect x="' + (treeX2 - 1.5).toFixed(1) + '" y="' + (h - 30) + '" width="3" height="12" fill="' + pal.trunk + '"/>' +
+        '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + bw + '" height="' + bh + '" rx="4" fill="' + pal.building + '"/>' +
+        windows +
+        '<rect x="' + (bx + bw / 2 - 15).toFixed(1) + '" y="' + (h - 26 - 28) + '" width="30" height="28" rx="2" fill="' + pal.door + '"/>' +
+      "</svg>"
+    );
+  }
+  function fmtDate(iso) {
+    if (!iso) return "-";
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "-";
+    return d.getFullYear() + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
+  }
+  function dbErrorMessage(e) {
+    if (!e || !e.code) return "알 수 없는 오류가 발생했어요.";
+    switch (e.code) {
+      case "quota_exceeded": return "저장 공간이 가득 찼어요. 잠시 후 다시 시도해주세요.";
+      case "invalid_argument": return "입력값을 확인해주세요.";
+      case "resource_exhausted": return "요청이 많아요. 잠시 후 다시 시도해주세요.";
+      case "revoked": return "접근 권한이 만료되었어요. 페이지를 새로고침해주세요.";
+      case "not_granted": return "이 화면에서는 저장 기능을 사용할 수 없어요.";
+      default: return "일시적인 오류가 발생했어요. 다시 시도해주세요.";
+    }
+  }
+  function cleanup() {
+    activeUnsubs.forEach(function (u) { try { u(); } catch (e) {} });
+    activeUnsubs = [];
+  }
+  function track(unsub) { activeUnsubs.push(unsub); }
+
+  // ---- give-to-get: unlock full detail after contributing at least one report ----
+  var unlockBadgeEl = document.getElementById("unlock-badge");
+  function hasContributed() {
+    try { return localStorage.getItem("wolgye_contributed") === "1"; } catch (e) { return false; }
+  }
+  function markContributed() {
+    try { localStorage.setItem("wolgye_contributed", "1"); } catch (e) {}
+    updateUnlockBadge();
+  }
+  function updateUnlockBadge() {
+    if (unlockBadgeEl) unlockBadgeEl.hidden = !hasContributed();
+  }
+
+  function options(list, placeholder) {
+    var html = placeholder ? '<option value="">' + esc(placeholder) + "</option>" : "";
+    list.forEach(function (v) { html += '<option value="' + esc(v) + '">' + esc(v) + "</option>"; });
+    return html;
+  }
+
+  // ---------------- ROUTER ----------------
+  function router() {
+    cleanup();
+    var hash = location.hash.replace(/^#\/?/, "");
+    var parts = hash.split("/").filter(Boolean);
+    window.scrollTo(0, 0);
+    if (parts[0] === "building" && parts[1]) renderDetail(decodeURIComponent(parts[1]));
+    else if (parts[0] === "submit") renderSubmit(parts[1] ? decodeURIComponent(parts[1]) : null);
+    else renderHome();
+  }
+  window.addEventListener("hashchange", router);
+
+  // ---------------- HOME ----------------
+  var homeCache = [];
+  function renderHome() {
+    app.innerHTML =
+      '<p class="intro">월계1동 <b>원룸·오피스텔·전세·매매</b> 등의 기록을 계약 전에 확인하세요. 난방비·관리비·생활조건은 익명으로 쌓입니다.</p>' +
+      '<div class="search-row">' +
+        '<input type="text" id="q" placeholder="건물명 또는 주소로 검색">' +
+        '<select id="ftype">' + options(ROOM_TYPES, "전체 유형") + "</select>" +
+        '<select id="fdeal">' + options(DEAL_TYPES, "전체 거래") + "</select>" +
+      "</div>" +
+      (hasContributed() ? "" :
+        '<div class="banner">🔒 난방비 체감·채광·소음 같은 상세 정보는 제보 1건을 남기면 모든 건물에서 볼 수 있어요. ' +
+        '<a href="#/submit" style="color:var(--accent-strong);font-weight:600">지금 제보하기 →</a></div>') +
+      '<div id="list" class="b-list"></div>';
+
+    var qInput = document.getElementById("q");
+    var typeSel = document.getElementById("ftype");
+    var dealSel = document.getElementById("fdeal");
+    var listEl = document.getElementById("list");
+
+    function paint() {
+      var q = qInput.value.trim().toLowerCase();
+      var t = typeSel.value;
+      var dl = dealSel.value;
+      var rows = homeCache.filter(function (b) {
+        var okQ = !q || (b.name || "").toLowerCase().indexOf(q) > -1 || (b.address || "").toLowerCase().indexOf(q) > -1;
+        var okT = !t || b.buildingType === t;
+        var okD = !dl || (b.lastDealType || "월세") === dl;
+        return okQ && okT && okD;
+      });
+      if (dbState === "unavailable") {
+        listEl.innerHTML = '<div class="banner">지금은 데이터를 불러올 수 없어요. 같은 조직 계정으로 로그인되어 있는지 확인해주세요.</div>';
+        return;
+      }
+      if (!rows.length) {
+        listEl.innerHTML =
+          '<div class="empty">' +
+            (homeCache.length ? "검색 결과가 없어요." : "아직 등록된 건물이 없어요.<br>첫 제보를 남겨서 아카이브를 시작해보세요.") +
+            (homeCache.length ? "" : '<div><a class="btn primary" href="#/submit">첫 제보 남기기</a></div>') +
+          "</div>";
+        return;
+      }
+      listEl.innerHTML = rows.map(function (b) {
+        var price = lastPriceLine(b);
+        return (
+          '<a class="b-card" href="#/building/' + encodeURIComponent(b.id) + '">' +
+            '<div class="b-card-row">' +
+              '<div class="b-thumb">' + buildingArt(b) + "</div>" +
+              '<div class="b-card-main">' +
+                '<div class="row1">' +
+                  '<span class="name">' + esc(b.name) + "</span>" +
+                  '<span class="tag">' + esc(b.buildingType || "기타") + "</span>" +
+                "</div>" +
+                '<div class="addr">' + esc(b.address || "주소 미상") + "</div>" +
+                (price ? '<div class="price-line">' + esc(price) + "</div>" : "") +
+                '<div class="meta"><span>최근 업데이트 ' + esc(fmtDate(b.lastReportAt)) + "</span></div>" +
+              "</div>" +
+            "</div>" +
+          "</a>"
+        );
+      }).join("");
+    }
+
+    qInput.addEventListener("input", paint);
+    typeSel.addEventListener("change", paint);
+    dealSel.addEventListener("change", paint);
+
+    if (!db) { paint(); return; }
+    var q = db.collection("buildings").orderBy("lastReportAt", "desc").limit(300);
+    var unsub = q.onSnapshot(function (snap) {
+      homeCache = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      paint();
+    }, function (e) {
+      dbState = "unavailable";
+      paint();
+    });
+    track(unsub);
+  }
+
+  // ---------------- DETAIL ----------------
+  function renderDetail(id) {
+    app.innerHTML = '<a class="back-link" href="#/">← 목록으로</a><div id="detail-body"></div>';
+    var body = document.getElementById("detail-body");
+    if (!db) {
+      body.innerHTML = '<div class="banner">데이터를 불러올 수 없어요.</div>';
+      return;
+    }
+    var buildingData = null;
+    var reports = [];
+
+    function paint() {
+      if (!buildingData) {
+        body.innerHTML = '<div class="empty">이 건물을 찾을 수 없어요.<div><a class="btn" href="#/">목록으로 돌아가기</a></div></div>';
+        return;
+      }
+      var stats = summarize(reports);
+      var unlocked = hasContributed();
+      body.innerHTML =
+        '<div class="b-hero">' + buildingArt(buildingData) + "</div>" +
+        '<div class="b-head">' +
+          '<span class="tag">' + esc(buildingData.buildingType || "기타") + "</span>" +
+          "<h2>" + esc(buildingData.name) + "</h2>" +
+          '<div class="addr">' + esc(buildingData.address || "주소 미상") + "</div>" +
+        "</div>" +
+        '<div class="stat-row">' +
+          '<div class="stat"><div class="k">제보 수</div><div class="v">' + reports.length + "건</div></div>" +
+          stats.priceTiles.map(function (t) {
+            return '<div class="stat"><div class="k">' + esc(t.k) + '</div><div class="v">' + esc(t.v) + "</div></div>";
+          }).join("") +
+          '<div class="stat"><div class="k">평균 관리비</div><div class="v">' + fmtWon(stats.avgFee) + "</div></div>" +
+          '<div class="stat"><div class="k">최근 업데이트</div><div class="v">' + esc(fmtDate(buildingData.lastReportAt)) + "</div></div>" +
+        "</div>" +
+        (stats.tags.length ? '<div class="chip-row" style="margin-top:14px">' + stats.tags.map(function (t) {
+          return '<span class="chip ' + t.cls + '">' + esc(t.label) + "</span>";
+        }).join("") + "</div>" : "") +
+        '<div class="section-h"><h3>제보 목록</h3><a class="btn" href="#/submit/' + encodeURIComponent(buildingData._id) + '">이 건물에 제보하기</a></div>' +
+        (!unlocked && reports.length ? lockBanner(buildingData._id) : "") +
+        '<div class="r-list">' +
+          (reports.length ? reports.map(function (r) { return reportCard(r, unlocked); }).join("") : '<div class="empty">아직 이 건물에 대한 제보가 없어요.</div>') +
+        "</div>";
+    }
+
+    function lockBanner(buildingId) {
+      return (
+        '<div class="lock-banner">' +
+          '<div class="lock-banner-icon">🔒</div>' +
+          '<div class="lock-banner-text"><b>제보 1건이면 모든 상세 정보가 열려요.</b><br>' +
+          '난방비 체감·채광·소음·특이사항 같은 자세한 기록은 이곳에 제보를 남긴 분에게만 보여드려요. 어떤 방이든 짧게 남겨도 충분해요.</div>' +
+          '<a class="btn primary" href="#/submit/' + encodeURIComponent(buildingId) + '">제보하고 전체 보기</a>' +
+        "</div>"
+      );
+    }
+
+    function reportCard(r, unlocked) {
+      var dealType = r.dealType || "월세";
+      var priceLine;
+      if (dealType === "전세") {
+        priceLine = '<span class="k">전세금</span><span class="v">' + fmtWon(r.jeonseAmount) + "</span>";
+      } else if (dealType === "매매") {
+        priceLine = '<span class="k">매매가</span><span class="v">' + fmtWon(r.saleAmount) + "</span>";
+      } else {
+        priceLine = '<span class="k">보증금 / 월세</span><span class="v">' + fmtWon(r.deposit) + " / " + fmtWon(r.rent) + "</span>";
+      }
+      var unitBits = [];
+      if (r.unitNumber) unitBits.push(esc(r.unitNumber));
+      if (r.floor) unitBits.push(esc(r.floor));
+      if (r.position && r.position !== "모르겠음") unitBits.push(esc(r.position));
+      var trustBadge = "";
+      if (r.residencyStatus === "퇴거 완료") {
+        trustBadge = '<span class="tag" style="background:var(--ok-soft);color:var(--ok)">✅ 퇴거 후 작성</span>';
+      } else if (r.residencyStatus === "거주 중") {
+        trustBadge = '<span class="tag" style="background:var(--warn-soft);color:var(--warn)">거주 중 작성</span>';
+      }
+      var attachHtml = r.contractAssetId
+        ? '<div style="margin-top:10px">' +
+            '<button type="button" class="btn ghost attach-toggle" style="padding:4px 8px;font-size:0.78rem;border:1px solid var(--line)">📎 첨부된 서류 보기 (자동 검증 아님)</button>' +
+            '<img class="attach-img" src="' + esc(r.contractAssetId.indexOf("data:") === 0 ? r.contractAssetId : "/_blob/" + r.contractAssetId) + '" alt="첨부된 계약서 사진" hidden style="display:block;margin-top:8px;max-width:100%;border-radius:8px;border:1px solid var(--line)">' +
+          "</div>"
+        : "";
+
+      // deposit/rent-style headline numbers stay visible (same idea as the masked bill on the pitch page);
+      // everything a resident could only know from actually living there is behind the give-to-get lock.
+      var detailInner =
+        (unitBits.length ? '<div style="margin-top:8px;font-size:0.86rem;color:var(--ink-muted)">' + unitBits.join(" · ") + "</div>" : "") +
+        '<div class="r-grid" style="margin-top:10px">' +
+          '<span class="k">난방 방식</span><span class="v">' + esc(r.heatingType || "-") + "</span>" +
+          '<span class="k">난방비 체감</span><span class="v">' + esc(r.heatingFeel || "-") + (r.heatingCostNote ? " (" + esc(r.heatingCostNote) + ")" : "") + "</span>" +
+        "</div>" +
+        '<div class="chip-row">' +
+          (r.maintenanceIncludes || []).map(function (m) { return '<span class="chip">관리비 포함: ' + esc(m) + "</span>"; }).join("") +
+          chipFor("채광", r.lightLevel) + chipFor("온수", r.hotWater) + chipFor("결로·곰팡이", r.mold) + chipFor("소음", r.noise) + chipFor("주차", r.parking) +
+        "</div>" +
+        (r.note ? '<div class="r-note">' + esc(r.note) + "</div>" : "") +
+        attachHtml;
+
+      var detailBlock = unlocked
+        ? detailInner
+        : (
+            '<div class="locked-wrap">' +
+              '<div class="locked-blur" aria-hidden="true">' + detailInner + "</div>" +
+              '<div class="lock-overlay">' +
+                "<span>🔒 난방비 · 채광 · 소음 등 상세 정보</span>" +
+                '<a class="btn primary" href="#/submit/' + encodeURIComponent(buildingData._id) + '">제보하고 잠금 해제</a>' +
+              "</div>" +
+            "</div>"
+          );
+
+      return (
+        '<div class="r-card">' +
+          '<div class="top"><span style="display:inline-flex;gap:6px;flex-wrap:wrap">' +
+            '<span class="tag">' + esc(dealType) + "</span>" +
+            '<span class="tag" style="background:var(--surface-2);color:var(--ink-muted)">' + esc(r.roomType || "기타") + "</span>" +
+            trustBadge +
+          "</span><span class=\"when\">" + esc(fmtDate(r.createdAt)) + (r.livedPeriod ? " · 거주 " + esc(r.livedPeriod) : "") + "</span></div>" +
+          '<div class="r-grid">' +
+            priceLine +
+            '<span class="k">관리비</span><span class="v">' + fmtWon(r.maintenanceFee) + "</span>" +
+          "</div>" +
+          detailBlock +
+        "</div>"
+      );
+    }
+    function chipFor(label, val) {
+      if (!val || val === "모르겠음") return "";
+      var cls = "";
+      if (["문제없음", "없음", "조용함", "가능", "매우 밝음", "밝음"].indexOf(val) > -1) cls = "ok";
+      if (["자주 끊김", "심함", "시끄러움", "불가능", "어두움", "매우 어두움"].indexOf(val) > -1) cls = "warn";
+      return '<span class="chip ' + cls + '">' + esc(label) + ": " + esc(val) + "</span>";
+    }
+    function summarize(list) {
+      var out = { avgFee: null, tags: [], priceTiles: [] };
+      var fees = list.map(function (r) { return r.maintenanceFee; }).filter(function (n) { return typeof n === "number"; });
+      if (fees.length) out.avgFee = Math.round(fees.reduce(function (a, b) { return a + b; }, 0) / fees.length);
+
+      function avgOf(arr) { return arr.length ? Math.round(arr.reduce(function (a, b) { return a + b; }, 0) / arr.length) : null; }
+      function priceTile(dealType, field, label) {
+        var vals = list.filter(function (r) { return (r.dealType || "월세") === dealType; })
+          .map(function (r) { return r[field]; })
+          .filter(function (n) { return typeof n === "number"; });
+        if (vals.length) out.priceTiles.push({ k: label + " 평균 (" + vals.length + "건)", v: fmtWon(avgOf(vals)) });
+      }
+      priceTile("월세", "rent", "월세");
+      priceTile("전세", "jeonseAmount", "전세금");
+      priceTile("매매", "saleAmount", "매매가");
+      function mode(field, goodVals, warnVals) {
+        var counts = {};
+        list.forEach(function (r) { var v = r[field]; if (v && v !== "모르겠음") counts[v] = (counts[v] || 0) + 1; });
+        var best = null, bestN = 0;
+        Object.keys(counts).forEach(function (k) { if (counts[k] > bestN) { best = k; bestN = counts[k]; } });
+        if (!best || list.length < 2) return;
+        var cls = goodVals.indexOf(best) > -1 ? "ok" : (warnVals.indexOf(best) > -1 ? "warn" : "");
+        out.tags.push({ label: best + " (" + bestN + "/" + list.length + "명)", cls: cls });
+      }
+      mode("residencyStatus", ["퇴거 완료"], []);
+      mode("lightLevel", ["매우 밝음", "밝음"], ["어두움", "매우 어두움"]);
+      mode("mold", ["없음"], ["심함"]);
+      mode("hotWater", ["문제없음"], ["자주 끊김"]);
+      mode("noise", ["조용함"], ["시끄러움"]);
+      return out;
+    }
+
+    var bUnsub = db.doc("buildings/" + id).onSnapshot(function (snap) {
+      buildingData = snap.exists ? Object.assign({ _id: id }, snap.data()) : null;
+      paint();
+    }, function () { buildingData = null; paint(); });
+    track(bUnsub);
+
+    var rUnsub = db.collection("buildings/" + id + "/reports").orderBy("createdAt", "desc").limit(200).onSnapshot(function (snap) {
+      reports = snap.docs.map(function (d) { return d.data(); });
+      paint();
+    }, function () { reports = []; paint(); });
+    track(rUnsub);
+  }
+
+  // ---------------- SUBMIT ----------------
+  function renderSubmit(presetId) {
+    var mode = presetId ? "existing" : "existing";
+    var picked = null; // { id, name, address }
+    var allBuildings = [];
+
+    app.innerHTML =
+      '<a class="back-link" href="#/">← 목록으로</a>' +
+      "<h2 style=\"margin-top:14px;font-size:1.5rem\">제보하기</h2>" +
+      '<p class="intro" style="padding-top:8px">제보는 익명으로 저장되고, 같은 건물을 찾는 다른 사람에게 공유됩니다. 정확한 지번보다는 대략적인 위치만 적어도 괜찮아요.</p>' +
+      '<form id="f">' +
+        '<fieldset>' +
+          '<legend>어느 건물인가요</legend>' +
+          '<div class="mode-toggle">' +
+            '<button type="button" id="mode-existing" class="active">기존 건물 찾기</button>' +
+            '<button type="button" id="mode-new">새 건물 등록</button>' +
+          "</div>" +
+          '<div id="mode-existing-panel">' +
+            '<div class="search-pick">' +
+              '<input type="text" id="b-search" placeholder="건물명 또는 주소로 검색">' +
+              '<div class="pick-results" id="pick-results" style="display:none"></div>' +
+            "</div>" +
+            '<div id="picked-box"></div>' +
+          "</div>" +
+          '<div id="mode-new-panel" style="display:none">' +
+            '<div class="field"><label class="main">건물명 (별칭 가능)</label><input type="text" id="nb-name" placeholder="예: 월계로 12길 나래빌"></div>' +
+            '<div class="field"><label class="main">대략적인 위치</label><input type="text" id="nb-addr" placeholder="예: 월계1동, 광운대 후문 도보 5분"></div>' +
+            '<div class="field"><label class="main">건물 유형</label><select id="nb-type">' + options(ROOM_TYPES) + "</select></div>" +
+          "</div>" +
+          '<div class="field-error" id="err-building" style="display:none">건물을 선택하거나 새로 등록해주세요.</div>' +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>거래 정보</legend>' +
+          '<div class="two-col">' +
+            '<div class="field"><label class="main">거래 유형 *</label><select id="dealType">' + options(DEAL_TYPES) + "</select></div>" +
+            '<div class="field"><label class="main">방 유형 *</label><select id="roomType">' + options(ROOM_TYPES) + "</select></div>" +
+          "</div>" +
+          '<div class="two-col">' +
+            '<div class="field"><label class="main">호수 (선택)</label><input type="text" id="unitNumber" placeholder="예: 302호"></div>' +
+            '<div class="field"><label class="main">층 (선택)</label><input type="text" id="floor" placeholder="예: 3층, 반지하, 옥탑"></div>' +
+          "</div>" +
+          '<p style="margin:10px 0 0;font-size:0.8rem;color:var(--ink-muted)">같은 건물이어도 호수·층·위치에 따라 온도·채광 차이가 커요. 아는 만큼만 적어주세요.</p>' +
+          '<div id="price-monthly" class="two-col">' +
+            '<div class="field"><label class="main">보증금 (만원) *</label><input type="number" id="deposit" min="0" placeholder="예: 1000"></div>' +
+            '<div class="field"><label class="main">월세 (만원) *</label><input type="number" id="rent" min="0" placeholder="예: 45"></div>' +
+          "</div>" +
+          '<div id="price-jeonse" class="field" style="display:none"><label class="main">전세금 (만원) *</label><input type="number" id="jeonseAmount" min="0" placeholder="예: 8000"></div>' +
+          '<div id="price-sale" class="field" style="display:none"><label class="main">매매가 (만원) *</label><input type="number" id="saleAmount" min="0" placeholder="예: 25000"></div>' +
+          '<div class="field"><label class="main">관리비 (만원, 대략)</label><input type="number" id="fee" min="0" placeholder="예: 7"></div>' +
+          '<div class="field"><label class="main">관리비 포함 항목</label>' +
+            '<div class="check-grid">' + INCLUDE_ITEMS.map(function (v) {
+              return '<label><input type="checkbox" name="inc" value="' + esc(v) + '"> ' + esc(v) + "</label>";
+            }).join("") + "</div>" +
+          "</div>" +
+          '<div class="field-error" id="err-rent" style="display:none">방 유형과, 거래 유형에 맞는 가격 정보를 꼭 입력해주세요.</div>' +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>난방 · 온수</legend>' +
+          '<div class="two-col">' +
+            '<div class="field"><label class="main">난방 방식</label><select id="heatingType">' + options(HEATING_TYPES) + "</select></div>" +
+            '<div class="field"><label class="main">동절기 난방비 체감</label><select id="heatingFeel">' + options(HEATING_FEEL) + "</select></div>" +
+          "</div>" +
+          '<div class="field"><label class="main">참고할 금액대 (선택)</label><input type="text" id="heatingCostNote" placeholder="예: 12~15만원 정도"></div>' +
+          '<div class="field"><label class="main">온수 상태</label><select id="hotWater">' + options(HOT_WATER) + "</select></div>" +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>채광 · 위치</legend>' +
+          '<div class="two-col">' +
+            '<div class="field"><label class="main">방 위치</label><select id="position">' + options(POSITIONS) + "</select></div>" +
+            '<div class="field"><label class="main">채광(조도)</label><select id="lightLevel">' + options(LIGHT_LEVELS) + "</select></div>" +
+          "</div>" +
+          '<p style="margin:10px 0 0;font-size:0.8rem;color:var(--ink-muted)">끝방(모서리)은 외벽에 더 많이 닿아 중간방보다 춥거나 더울 수 있어요.</p>' +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>생활 환경</legend>' +
+          '<div class="two-col">' +
+            '<div class="field"><label class="main">결로 · 곰팡이</label><select id="mold">' + options(MOLD) + "</select></div>" +
+            '<div class="field"><label class="main">소음</label><select id="noise">' + options(NOISE) + "</select></div>" +
+          "</div>" +
+          '<div class="field"><label class="main">주차</label><select id="parking">' + options(PARKING) + "</select></div>" +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>거주 시기 · 특이사항</legend>' +
+          '<div class="field"><label class="main">거주 시기 (선택)</label><input type="text" id="livedPeriod" placeholder="예: 2024~2025"></div>' +
+          '<div class="field"><label class="main">자유롭게 남기고 싶은 이야기 (선택)</label><textarea id="note" placeholder="예: 저녁마다 온수가 약해져서 온수기 온도를 최고로 맞춰야 했어요."></textarea></div>' +
+        "</fieldset>" +
+
+        '<fieldset>' +
+          '<legend>신뢰도 정보 (선택)</legend>' +
+          '<div class="field"><label class="main">지금 이 집에 사시나요?</label><select id="residencyStatus">' + options(RESIDENCY_STATUS, "선택 안 함") + "</select></div>" +
+          '<p style="margin:8px 0 0;font-size:0.8rem;color:var(--ink-muted)">아직 거주 중인 제보는 다음 세입자를 구하려는 목적이 섞여 있을 수 있어요. 이미 퇴거하신 분의 제보라면 밝혀주시면 다른 사람이 더 믿을 수 있어요.</p>' +
+          '<div class="field">' +
+            '<label class="main">계약서 사진 (선택)</label>' +
+            '<input type="file" id="contractFile" accept="image/*">' +
+            '<p class="hint">이름·연락처·계좌·주민번호는 반드시 가리고, 주소·호수·계약기간만 보이게 찍어주세요. 자동으로 진위를 확인하진 않으며 참고용 표시만 붙어요.</p>' +
+          "</div>" +
+        "</fieldset>" +
+
+        '<div class="submit-bar">' +
+          '<button type="button" class="btn" id="cancel">취소</button>' +
+          '<button type="submit" class="btn primary" id="submitBtn">제보 등록하기</button>' +
+        "</div>" +
+      "</form>";
+
+    document.getElementById("cancel").addEventListener("click", function () { location.hash = "#/"; });
+
+    var existingBtn = document.getElementById("mode-existing");
+    var newBtn = document.getElementById("mode-new");
+    var existingPanel = document.getElementById("mode-existing-panel");
+    var newPanel = document.getElementById("mode-new-panel");
+    function setMode(m) {
+      mode = m;
+      existingBtn.classList.toggle("active", m === "existing");
+      newBtn.classList.toggle("active", m === "new");
+      existingPanel.style.display = m === "existing" ? "" : "none";
+      newPanel.style.display = m === "new" ? "" : "none";
+    }
+    existingBtn.addEventListener("click", function () { setMode("existing"); });
+    newBtn.addEventListener("click", function () { setMode("new"); });
+
+    var dealTypeSel = document.getElementById("dealType");
+    var priceMonthly = document.getElementById("price-monthly");
+    var priceJeonse = document.getElementById("price-jeonse");
+    var priceSale = document.getElementById("price-sale");
+    function updatePriceFields() {
+      var d = dealTypeSel.value;
+      priceMonthly.style.display = d === "월세" ? "" : "none";
+      priceJeonse.style.display = d === "전세" ? "" : "none";
+      priceSale.style.display = d === "매매" ? "" : "none";
+    }
+    dealTypeSel.addEventListener("change", updatePriceFields);
+    updatePriceFields();
+
+    var searchInput = document.getElementById("b-search");
+    var resultsBox = document.getElementById("pick-results");
+    var pickedBox = document.getElementById("picked-box");
+
+    function renderPicked() {
+      if (!picked) { pickedBox.innerHTML = ""; return; }
+      pickedBox.innerHTML =
+        '<div class="picked-box"><span>' + esc(picked.name) + " · " + esc(picked.address || "") + '</span><button type="button" id="unpick">변경</button></div>';
+      document.getElementById("unpick").addEventListener("click", function () {
+        picked = null; renderPicked(); searchInput.value = ""; searchInput.focus();
+      });
+    }
+    function paintResults() {
+      var q = searchInput.value.trim().toLowerCase();
+      if (!q) { resultsBox.style.display = "none"; resultsBox.innerHTML = ""; return; }
+      var rows = allBuildings.filter(function (b) {
+        return (b.name || "").toLowerCase().indexOf(q) > -1 || (b.address || "").toLowerCase().indexOf(q) > -1;
+      }).slice(0, 12);
+      if (!rows.length) {
+        resultsBox.style.display = "";
+        resultsBox.innerHTML = '<div class="pick-item">검색 결과가 없어요. "새 건물 등록"을 이용해주세요.</div>';
+        return;
+      }
+      resultsBox.style.display = "";
+      resultsBox.innerHTML = rows.map(function (b) {
+        return '<div class="pick-item" data-id="' + esc(b.id) + '"><div>' + esc(b.name) + '</div><div class="a">' + esc(b.address || "") + "</div></div>";
+      }).join("");
+      Array.prototype.forEach.call(resultsBox.querySelectorAll(".pick-item[data-id]"), function (el) {
+        el.addEventListener("click", function () {
+          var id = el.getAttribute("data-id");
+          var b = allBuildings.filter(function (x) { return x.id === id; })[0];
+          if (b) { picked = b; renderPicked(); searchInput.value = ""; resultsBox.style.display = "none"; }
+        });
+      });
+    }
+    searchInput.addEventListener("input", paintResults);
+
+    if (db) {
+      db.collection("buildings").limit(500).get().then(function (snap) {
+        allBuildings = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+        if (presetId) {
+          var pre = allBuildings.filter(function (b) { return b.id === presetId; })[0];
+          if (pre) { picked = pre; renderPicked(); }
+        }
+      }).catch(function () {});
+    }
+
+    document.getElementById("f").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      submitReport();
+    });
+
+    function val(id) { return document.getElementById(id).value; }
+    function numOrNull(id) { var v = val(id); if (v === "") return null; var n = Number(v); return isNaN(n) ? null : n; }
+
+    function submitReport() {
+      document.getElementById("err-building").style.display = "none";
+      document.getElementById("err-rent").style.display = "none";
+
+      var dealType = val("dealType") || "월세";
+      var roomType = val("roomType");
+      var deposit = null, rent = null, jeonseAmount = null, saleAmount = null, priceOk = false;
+      if (dealType === "전세") {
+        jeonseAmount = numOrNull("jeonseAmount");
+        priceOk = jeonseAmount !== null;
+      } else if (dealType === "매매") {
+        saleAmount = numOrNull("saleAmount");
+        priceOk = saleAmount !== null;
+      } else {
+        deposit = numOrNull("deposit"); rent = numOrNull("rent");
+        priceOk = deposit !== null && rent !== null;
+      }
+      if (!roomType || !priceOk) {
+        document.getElementById("err-rent").style.display = "";
+        return;
+      }
+      var newName = val("nb-name").trim(), newAddr = val("nb-addr").trim();
+      if (mode === "existing" && !picked) {
+        document.getElementById("err-building").style.display = "";
+        return;
+      }
+      if (mode === "new" && !newName) {
+        document.getElementById("err-building").style.display = "";
+        return;
+      }
+      if (!db) { toast("지금은 저장할 수 없어요. 잠시 후 다시 시도해주세요."); return; }
+
+      var btn = document.getElementById("submitBtn");
+      btn.disabled = true; btn.textContent = "등록 중...";
+
+      var incs = Array.prototype.map.call(document.querySelectorAll('input[name="inc"]:checked'), function (i) { return i.value; });
+      var reportData = {
+        dealType: dealType,
+        roomType: roomType,
+        unitNumber: val("unitNumber").trim(),
+        floor: val("floor").trim(),
+        position: val("position") || "모르겠음",
+        lightLevel: val("lightLevel") || "모르겠음",
+        deposit: deposit,
+        rent: rent,
+        jeonseAmount: jeonseAmount,
+        saleAmount: saleAmount,
+        maintenanceFee: numOrNull("fee"),
+        maintenanceIncludes: incs,
+        heatingType: val("heatingType") || "모르겠음",
+        heatingFeel: val("heatingFeel") || "모르겠음",
+        heatingCostNote: val("heatingCostNote").trim(),
+        hotWater: val("hotWater") || "모르겠음",
+        mold: val("mold") || "모르겠음",
+        noise: val("noise") || "모르겠음",
+        parking: val("parking") || "모르겠음",
+        livedPeriod: val("livedPeriod").trim(),
+        note: val("note").trim(),
+        residencyStatus: val("residencyStatus") || "모르겠음",
+        contractAssetId: null,
+        createdAt: new Date().toISOString()
+      };
+
+      var contractFile = (document.getElementById("contractFile").files || [])[0] || null;
+      var attachmentPromise = Promise.resolve(null);
+      if (contractFile && window.claude && window.claude.use) {
+        attachmentPromise = window.claude.use("assets").then(function (assets) {
+          if (!assets) return null;
+          return assets.upload(contractFile).then(function (res) { return res.id; }).catch(function () { return null; });
+        }).catch(function () { return null; });
+      }
+
+      var buildingPromise;
+      if (mode === "existing") {
+        buildingPromise = Promise.resolve(picked.id);
+      } else {
+        buildingPromise = db.collection("buildings").add({
+          name: newName,
+          address: newAddr,
+          buildingType: val("nb-type") || "기타",
+          createdAt: new Date().toISOString(),
+          lastReportAt: new Date().toISOString()
+        }).then(function (ref) { return ref.id; });
+      }
+
+      Promise.all([buildingPromise, attachmentPromise]).then(function (results) {
+        var buildingId = results[0];
+        reportData.contractAssetId = results[1];
+        return db.collection("buildings/" + buildingId + "/reports").add(reportData).then(function () {
+          return db.doc("buildings/" + buildingId).update({
+            lastReportAt: reportData.createdAt,
+            lastDealType: reportData.dealType,
+            lastDeposit: reportData.deposit,
+            lastRent: reportData.rent,
+            lastJeonseAmount: reportData.jeonseAmount,
+            lastSaleAmount: reportData.saleAmount
+          }).catch(function () {});
+        }).then(function () { return buildingId; });
+      }).then(function (buildingId) {
+        markContributed();
+        toast("제보가 등록되었어요. 고마워요! 이제 모든 건물의 상세 정보를 볼 수 있어요.");
+        location.hash = "#/building/" + encodeURIComponent(buildingId);
+      }).catch(function (e) {
+        btn.disabled = false; btn.textContent = "제보 등록하기";
+        toast(dbErrorMessage(e));
+      });
+    }
+  }
+
+  // ---------------- INIT ----------------
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest(".attach-toggle");
+    if (!btn) return;
+    var img = btn.nextElementSibling;
+    if (img) img.hidden = !img.hidden;
+  });
+
+  function boot(claudeDb) {
+    db = claudeDb;
+    dbState = db ? "ready" : "unavailable";
+    updateUnlockBadge();
+    router();
+  }
+  function start() {
+    if (window.claude && window.claude.use) {
+      window.claude.use("db").then(boot).catch(function () { boot(null); });
+    } else {
+      boot(null);
+    }
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) {
+    window.claude.hot.ready(start);
+  } else {
+    start();
+  }
+})();
+</script>
+
+<div id="static-note" style="position:fixed;left:0;right:0;bottom:0;z-index:100;background:rgba(27,35,46,0.92);color:#f3f5f7;font-size:11.5px;text-align:center;padding:7px 10px calc(7px + env(safe-area-inset-bottom,0px));">정적 데모판 &middot; 제보 데이터는 이 브라우저에만 저장돼요 (다른 기기&middot;다른 사람과는 공유되지 않아요)</div>
+</body>
+</html>
